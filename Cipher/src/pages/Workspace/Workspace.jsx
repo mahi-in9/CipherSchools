@@ -1,17 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom"; // Essential for dynamic IDs
 import Editor from "@monaco-editor/react";
 import "./Workspace.scss";
 
 const Workspace = () => {
+  const { id } = useParams();
+  const [assignment, setAssignment] = useState(null);
   const [query, setQuery] = useState("SELECT * FROM users;");
   const [result, setResult] = useState(null);
   const [hint, setHint] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Simulate executing query against Backend
+  useEffect(() => {
+    const mockAssignments = [
+      {
+        id: 1,
+        title: "Basic Select",
+        question: "Select all users who have the role of 'Admin'.",
+        schema: ["id (INT)", "name (VARCHAR)", "role (VARCHAR)"],
+        tableName: "Users",
+      },
+      {
+        id: 2,
+        title: "Aggregations",
+        question: "Calculate the total amount of sales from the orders table.",
+        schema: ["id (INT)", "amount (DECIMAL)", "region (TEXT)"],
+        tableName: "Orders",
+      },
+      {
+        id: 3,
+        title: "Complex Joins",
+        question: "Retrieve customer names along with their order IDs.",
+        schema: ["user_id (INT)", "order_id (INT)", "product_name (TEXT)"],
+        tableName: "Join_Data",
+      },
+    ];
+
+    const found = mockAssignments.find((a) => a.id === parseInt(id));
+    setAssignment(found);
+  }, [id]);
+
   const handleRunQuery = async () => {
     setLoading(true);
-    // In production: const res = await fetch('/api/execute', { method: 'POST', body: JSON.stringify({ query }) });
+    // Simulation logic
     setTimeout(() => {
       setResult([
         { id: 1, name: "Alice", role: "Admin" },
@@ -21,30 +52,30 @@ const Workspace = () => {
     }, 800);
   };
 
-  // Simulate LLM Hint
   const getHint = async () => {
     setHint("Thinking...");
-    // In production: call LLM API here
     setTimeout(() => {
       setHint("💡 Try filtering by the 'role' column using a WHERE clause.");
     }, 1000);
   };
 
+  if (!assignment) return <div className="loading">Loading Challenge...</div>;
+
   return (
     <div className="workspace">
-      {/* Left Panel: Question & Schema */}
+      {/* Left Panel: DYNAMIC Question & Schema */}
       <div className="workspace__sidebar">
         <div className="workspace__panel">
-          <h3>Question 1: Find Admins</h3>
-          <p>Select all users who have the role of 'Admin'.</p>
+          <h3>{assignment.title}</h3>
+          <p>{assignment.question}</p>
         </div>
 
         <div className="workspace__panel">
-          <h3>Schema: Users</h3>
+          <h3>Schema: {assignment.tableName}</h3>
           <ul className="schema-list">
-            <li>id (INT)</li>
-            <li>name (VARCHAR)</li>
-            <li>role (VARCHAR)</li>
+            {assignment.schema.map((column, index) => (
+              <li key={index}>{column}</li>
+            ))}
           </ul>
         </div>
       </div>
@@ -58,6 +89,7 @@ const Workspace = () => {
             value={query}
             onChange={(val) => setQuery(val)}
             theme="vs-dark"
+            options={{ minimap: { enabled: false }, fontSize: 14 }}
           />
         </div>
 
@@ -78,24 +110,26 @@ const Workspace = () => {
 
         <div className="workspace__results">
           {result ? (
-            <table className="results-table">
-              <thead>
-                <tr>
-                  {Object.keys(result[0]).map((key) => (
-                    <th key={key}>{key}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {result.map((row, i) => (
-                  <tr key={i}>
-                    {Object.values(row).map((val, j) => (
-                      <td key={j}>{val}</td>
+            <div className="table-wrapper">
+              <table className="results-table">
+                <thead>
+                  <tr>
+                    {Object.keys(result[0]).map((key) => (
+                      <th key={key}>{key}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {result.map((row, i) => (
+                    <tr key={i}>
+                      {Object.values(row).map((val, j) => (
+                        <td key={j}>{val}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <p className="empty-state">Run a query to see results</p>
           )}
