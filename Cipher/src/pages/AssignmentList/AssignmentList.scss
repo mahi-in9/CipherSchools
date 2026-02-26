@@ -1,0 +1,75 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.assignment-list {
+  &__header {
+    margin-bottom: $spacing-md;
+    text-align: center;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr; // Mobile: 1 column
+    gap: $spacing-sm;
+
+    // Tablet: 2 columns
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-md;
+    }
+
+    // Desktop: 3 columns
+    @include desktop {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+// BEM Block: Assignment Card
+.assignment-card {
+  background: white;
+  padding: $spacing-md;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid $primary-color;
+  display: flex;
+  flex-direction: column;
+
+  &--easy {
+    border-left-color: $success-color;
+  }
+  &--medium {
+    border-left-color: #f59e0b;
+  }
+  &--hard {
+    border-left-color: $error-color;
+  }
+
+  &__badge {
+    align-self: flex-start;
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    background: #eee;
+    border-radius: 12px;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__title {
+    margin-bottom: $spacing-xs;
+  }
+
+  &__desc {
+    color: $text-muted;
+    font-size: 0.9rem;
+    margin-bottom: $spacing-md;
+    flex-grow: 1;
+  }
+
+  &__btn {
+    @include btn-base;
+    background-color: $primary-color;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+  }
+}

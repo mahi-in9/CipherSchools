@@ -1,0 +1,21 @@
+@use "variables" as *;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: $background-light;
+  color: $text-dark;
+  line-height: 1.6;
+}
+
+// Global Utility Classes
+.container {
+  padding: $spacing-sm;
+  max-width: 100%;
+  margin: 0 auto;
+}

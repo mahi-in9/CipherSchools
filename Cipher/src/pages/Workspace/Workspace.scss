@@ -1,0 +1,100 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.workspace {
+  display: flex;
+  flex-direction: column; // Mobile: Stacked
+  height: calc(100vh - 60px); // Minus navbar
+
+  @include desktop {
+    flex-direction: row; // Desktop: Side-by-side
+  }
+
+  &__sidebar {
+    padding: $spacing-sm;
+    background: white;
+    border-bottom: 1px solid $border-color;
+
+    @include desktop {
+      width: 30%;
+      border-right: 1px solid $border-color;
+      border-bottom: none;
+      overflow-y: auto;
+    }
+  }
+
+  &__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &__panel {
+    margin-bottom: $spacing-md;
+
+    h3 {
+      font-size: 1.1rem;
+      margin-bottom: $spacing-xs;
+      color: $primary-color;
+    }
+  }
+
+  &__controls {
+    padding: $spacing-sm;
+    background: $background-light;
+    display: flex;
+    gap: $spacing-sm;
+    border-bottom: 1px solid $border-color;
+  }
+
+  &__hint {
+    background: #eff6ff;
+    padding: $spacing-sm;
+    border-left: 4px solid $primary-color;
+    margin: $spacing-sm;
+    font-size: 0.9rem;
+  }
+
+  &__results {
+    flex: 1;
+    overflow: auto;
+    padding: $spacing-sm;
+    background: white;
+  }
+}
+
+// Shared Button Classes
+.btn {
+  @include btn-base;
+
+  &--primary {
+    background: $success-color;
+    color: white;
+  }
+
+  &--secondary {
+    background: white;
+    border: 1px solid $primary-color;
+    color: $primary-color;
+  }
+}
+
+// Simple Table Styles
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    border: 1px solid $border-color;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: $background-light;
+    font-weight: 600;
+  }
+}
