@@ -1,69 +1,70 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Essential for dynamic IDs
+import { useParams } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import "./Workspace.scss";
+import { getHint } from "../../api/hintApi";
+import { executeQuery } from "../../api/queryApi";
+import { getAssignmentById } from "../../api/assignmentApi";
 
 const Workspace = () => {
   const { id } = useParams();
+
   const [assignment, setAssignment] = useState(null);
-  const [query, setQuery] = useState("SELECT * FROM users;");
+  const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
   const [hint, setHint] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const mockAssignments = [
-      {
-        id: 1,
-        title: "Basic Select",
-        question: "Select all users who have the role of 'Admin'.",
-        schema: ["id (INT)", "name (VARCHAR)", "role (VARCHAR)"],
-        tableName: "Users",
-      },
-      {
-        id: 2,
-        title: "Aggregations",
-        question: "Calculate the total amount of sales from the orders table.",
-        schema: ["id (INT)", "amount (DECIMAL)", "region (TEXT)"],
-        tableName: "Orders",
-      },
-      {
-        id: 3,
-        title: "Complex Joins",
-        question: "Retrieve customer names along with their order IDs.",
-        schema: ["user_id (INT)", "order_id (INT)", "product_name (TEXT)"],
-        tableName: "Join_Data",
-      },
-    ];
-
-    const found = mockAssignments.find((a) => a.id === parseInt(id));
-    setAssignment(found);
+    fetchAssignment();
   }, [id]);
 
-  const handleRunQuery = async () => {
-    setLoading(true);
-    // Simulation logic
-    setTimeout(() => {
-      setResult([
-        { id: 1, name: "Alice", role: "Admin" },
-        { id: 2, name: "Bob", role: "User" },
-      ]);
+  const fetchAssignment = async () => {
+    try {
+      const res = await getAssignmentById(id);
+      setAssignment(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleExecute = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setHint("");
+
+      const res = await executeQuery({
+        assignmentId: id,
+        query,
+      });
+
+      setResult(res.data.rows);
+    } catch (err) {
+      setError(err.response?.data?.error);
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
-  const getHint = async () => {
-    setHint("Thinking...");
-    setTimeout(() => {
-      setHint("💡 Try filtering by the 'role' column using a WHERE clause.");
-    }, 1000);
+  const handleHint = async () => {
+    try {
+      const res = await getHint({
+        assignmentId: id,
+        userQuery: query,
+        errorMessage: error,
+      });
+      setHint(res.data.hint);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  if (!assignment) return <div className="loading">Loading Challenge...</div>;
+  if (!assignment) return <div>Loading...</div>;
 
   return (
     <div className="workspace">
-      {/* Left Panel: DYNAMIC Question & Schema */}
       <div className="workspace__sidebar">
         <div className="workspace__panel">
           <h3>{assignment.title}</h3>
@@ -71,69 +72,64 @@ const Workspace = () => {
         </div>
 
         <div className="workspace__panel">
-          <h3>Schema: {assignment.tableName}</h3>
-          <ul className="schema-list">
-            {assignment.schema.map((column, index) => (
-              <li key={index}>{column}</li>
-            ))}
-          </ul>
+          {assignment.tables.map((table, index) => (
+            <div key={index}>
+              <h4>{table.tableName}</h4>
+              <ul>
+                {table.columns.map((col, i) => (
+                  <li key={i}>
+                    {col.name} ({col.type})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Right Panel: Editor & Output */}
       <div className="workspace__main">
-        <div className="workspace__editor-container">
-          <Editor
-            height="40vh"
-            defaultLanguage="sql"
-            value={query}
-            onChange={(val) => setQuery(val)}
-            theme="vs-dark"
-            options={{ minimap: { enabled: false }, fontSize: 14 }}
-          />
-        </div>
+        <Editor
+          height="40vh"
+          defaultLanguage="sql"
+          value={query}
+          onChange={(val) => setQuery(val || "")}
+          theme="vs-dark"
+          options={{ minimap: { enabled: false }, fontSize: 14 }}
+        />
 
         <div className="workspace__controls">
-          <button
-            className="btn btn--primary"
-            onClick={handleRunQuery}
-            disabled={loading}
-          >
+          <button onClick={handleExecute} disabled={loading}>
             {loading ? "Running..." : "Execute Query"}
           </button>
-          <button className="btn btn--secondary" onClick={getHint}>
+
+          <button onClick={handleHint}>
             Get AI Hint
           </button>
         </div>
 
+        {error && <div className="workspace__error">{error}</div>}
         {hint && <div className="workspace__hint">{hint}</div>}
 
-        <div className="workspace__results">
-          {result ? (
-            <div className="table-wrapper">
-              <table className="results-table">
-                <thead>
-                  <tr>
-                    {Object.keys(result[0]).map((key) => (
-                      <th key={key}>{key}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.map((row, i) => (
-                    <tr key={i}>
-                      {Object.values(row).map((val, j) => (
-                        <td key={j}>{val}</td>
-                      ))}
-                    </tr>
+        {result && result.length > 0 && (
+          <table>
+            <thead>
+              <tr>
+                {Object.keys(result[0]).map((key) => (
+                  <th key={key}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {result.map((row, i) => (
+                <tr key={i}>
+                  {Object.values(row).map((val, j) => (
+                    <td key={j}>{val}</td>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="empty-state">Run a query to see results</p>
-          )}
-        </div>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

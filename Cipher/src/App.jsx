@@ -6,7 +6,7 @@ import "./styles/main.scss";
 
 function App() {
   return (
-    <Router>
+    <>
       <div className="app">
         <nav
           className="navbar"
@@ -29,7 +29,7 @@ function App() {
           <Route path="/attempt/:id" element={<Workspace />} />
         </Routes>
       </div>
-    </Router>
+    </>
   );
 }
 

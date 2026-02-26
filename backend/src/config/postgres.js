@@ -1,16 +1,15 @@
 const { Pool } = require("pg");
 
-const pgPool = new Pool({
+const pool = new Pool({
   connectionString: process.env.POSTGRES_URI,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 const connectPostgres = async () => {
   try {
-    const client = await pgPool.connect();
+    const client = await pool.connect();
     console.log("PostgreSQL Connected");
     client.release();
   } catch (error) {
@@ -19,4 +18,4 @@ const connectPostgres = async () => {
   }
 };
 
-module.exports = { pgPool, connectPostgres };
+module.exports = { pool, connectPostgres };
