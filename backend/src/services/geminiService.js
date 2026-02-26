@@ -1,66 +1,55 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash", // fast + cost efficient
-});
-
-function buildPrompt({ question, tables, userQuery, errorMessage }) {
-  const schemaDescription = tables
-    .map((table) => {
-      const columns = table.columns
-        .map((col) => `${col.name} (${col.type})`)
-        .join(", ");
-      return `Table: ${table.tableName}\nColumns: ${columns}`;
-    })
-    .join("\n\n");
-
-  return `
-You are an SQL tutor.
-
-IMPORTANT RULES:
-- Do NOT provide the full SQL solution.
-- Give only conceptual hints.
-- Guide the student step-by-step.
-- If the query has an error, explain what kind of mistake it might be.
-- Keep hints concise and educational.
-
-========================
-QUESTION:
-${question}
-
-DATABASE SCHEMA:
-${schemaDescription}
-
-USER QUERY:
-${userQuery}
-
-ERROR MESSAGE (if any):
-${errorMessage || "None"}
-========================
-
-Now provide a helpful hint:
-`;
-}
+const fetch = require("node-fetch");
 
 async function generateHint({ question, tables, userQuery, errorMessage }) {
   try {
-    const prompt = buildPrompt({
-      question,
-      tables,
-      userQuery,
-      errorMessage,
-    });
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" +
+        process.env.GEMINI_API_KEY,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `
+You are a SQL tutor.
 
-    const result = await model.generateContent(prompt);
+Question:
+${question}
 
-    const response = await result.response;
-    const text = response.text();
+Tables:
+${JSON.stringify(tables, null, 2)}
 
-    return text.trim();
+User Query:
+${userQuery}
+
+Error:
+${errorMessage || "None"}
+
+Give a short helpful hint. Do NOT provide full solution.
+`,
+                },
+              ],
+            },
+          ],
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Gemini API Error:", data);
+      throw new Error("Gemini request failed");
+    }
+
+    return data.candidates[0].content.parts[0].text;
   } catch (error) {
-    console.error("Gemini API Error:", error.message);
+    console.error("Gemini Service Error:", error);
     throw new Error("AI hint generation failed");
   }
 }

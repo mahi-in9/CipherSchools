@@ -12,143 +12,109 @@ const connectDB = async () => {
 const assignments = [
   {
     title: "Find High Salary Employees",
-    description: "Easy",
+    difficulty: "easy",
+    description: "Basic filtering using WHERE clause",
     question: "List all employees earning more than 50,000",
-    sampleTables: [
+    postgresSchemaName: "high_salary_employees",
+
+    tables: [
       {
         tableName: "employees",
         columns: [
-          { columnName: "id", dataType: "INTEGER" },
-          { columnName: "name", dataType: "TEXT" },
-          { columnName: "salary", dataType: "INTEGER" },
-          { columnName: "department", dataType: "TEXT" },
-        ],
-        rows: [
-          { id: 1, name: "Alice", salary: 45000, department: "HR" },
-          { id: 2, name: "Bob", salary: 60000, department: "Engineering" },
-          {
-            id: 3,
-            name: "Charlie",
-            salary: 75000,
-            department: "Engineering",
-          },
-          { id: 4, name: "Diana", salary: 48000, department: "Sales" },
+          { name: "id", type: "INTEGER" },
+          { name: "name", type: "TEXT" },
+          { name: "salary", type: "INTEGER" },
+          { name: "department", type: "TEXT" },
         ],
       },
     ],
-    expectedOutput: {
-      type: "table",
-      value: [
-        { id: 2, name: "Bob", salary: 60000, department: "Engineering" },
-        { id: 3, name: "Charlie", salary: 75000, department: "Engineering" },
-      ],
-    },
-    createdAt: "2025-01-01T00:00:00.000Z",
-    updatedAt: "2025-01-01T00:00:00.000Z",
+
+    samplePreview: [
+      { id: 2, name: "Bob", salary: 60000, department: "Engineering" },
+      { id: 3, name: "Charlie", salary: 75000, department: "Engineering" },
+    ],
   },
+
   {
     title: "Department-wise Employee Count",
-    description: "Medium",
+    difficulty: "medium",
+    description: "Aggregation using GROUP BY",
     question: "Find the number of employees in each department",
-    sampleTables: [
+    postgresSchemaName: "dept_employee_count",
+
+    tables: [
       {
         tableName: "employees",
         columns: [
-          { columnName: "id", dataType: "INTEGER" },
-          { columnName: "name", dataType: "TEXT" },
-          { columnName: "department", dataType: "TEXT" },
-        ],
-        rows: [
-          { id: 1, name: "Alice", department: "HR" },
-          { id: 2, name: "Bob", department: "Engineering" },
-          { id: 3, name: "Charlie", department: "Engineering" },
-          { id: 4, name: "Diana", department: "Sales" },
-          { id: 5, name: "Eve", department: "Sales" },
+          { name: "id", type: "INTEGER" },
+          { name: "name", type: "TEXT" },
+          { name: "department", type: "TEXT" },
         ],
       },
     ],
-    expectedOutput: {
-      type: "table",
-      value: [
-        { department: "HR", count: 1 },
-        { department: "Engineering", count: 2 },
-        { department: "Sales", count: 2 },
-      ],
-    },
-    createdAt: "2025-01-01T00:00:00.000Z",
-    updatedAt: "2025-01-01T00:00:00.000Z",
+
+    samplePreview: [
+      { department: "HR", count: 1 },
+      { department: "Engineering", count: 2 },
+      { department: "Sales", count: 2 },
+    ],
   },
+
   {
     title: "Total Order Value per Customer",
-    description: "Medium",
+    difficulty: "medium",
+    description: "JOIN and aggregation",
     question: "Find total order value for each customer",
-    sampleTables: [
+    postgresSchemaName: "total_order_value",
+
+    tables: [
       {
         tableName: "customers",
         columns: [
-          { columnName: "id", dataType: "INTEGER" },
-          { columnName: "name", dataType: "TEXT" },
-        ],
-        rows: [
-          { id: 1, name: "Aman" },
-          { id: 2, name: "Saurabh" },
+          { name: "id", type: "INTEGER" },
+          { name: "name", type: "TEXT" },
         ],
       },
       {
         tableName: "orders",
         columns: [
-          { columnName: "id", dataType: "INTEGER" },
-          { columnName: "customer_id", dataType: "INTEGER" },
-          { columnName: "amount", dataType: "REAL" },
-        ],
-        rows: [
-          { id: 1, customer_id: 1, amount: 1200.5 },
-          { id: 2, customer_id: 1, amount: 800.0 },
-          { id: 3, customer_id: 2, amount: 1500.0 },
+          { name: "id", type: "INTEGER" },
+          { name: "customer_id", type: "INTEGER" },
+          { name: "amount", type: "REAL" },
         ],
       },
     ],
-    expectedOutput: {
-      type: "table",
-      value: [
-        { name: "Aman", total_amount: 2000.5 },
-        { name: "Saurabh", total_amount: 1500.0 },
-      ],
-    },
-    createdAt: "2025-01-01T00:00:00.000Z",
-    updatedAt: "2025-01-01T00:00:00.000Z",
+
+    samplePreview: [
+      { name: "Aman", total_amount: 2000.5 },
+      { name: "Saurabh", total_amount: 1500.0 },
+    ],
   },
+
   {
     title: "Highest Paid Employee",
-    description: "Hard",
+    difficulty: "hard",
+    description: "Subquery or MAX aggregation",
     question: "Find the employee(s) with the highest salary",
-    sampleTables: [
+    postgresSchemaName: "highest_paid_employee",
+
+    tables: [
       {
         tableName: "employees",
         columns: [
-          { columnName: "id", dataType: "INTEGER" },
-          { columnName: "name", dataType: "TEXT" },
-          { columnName: "salary", dataType: "INTEGER" },
-        ],
-        rows: [
-          { id: 1, name: "Alice", salary: 70000 },
-          { id: 2, name: "Bob", salary: 85000 },
-          { id: 3, name: "Charlie", salary: 85000 },
+          { name: "id", type: "INTEGER" },
+          { name: "name", type: "TEXT" },
+          { name: "salary", type: "INTEGER" },
         ],
       },
     ],
-    expectedOutput: {
-      type: "table",
-      value: [
-        { id: 2, name: "Bob", salary: 85000 },
-        { id: 3, name: "Charlie", salary: 85000 },
-      ],
-    },
-    createdAt: "2025-01-01T00:00:00.000Z",
-    updatedAt: "2025-01-01T00:00:00.000Z",
+
+    samplePreview: [
+      { id: 2, name: "Bob", salary: 85000 },
+      { id: 3, name: "Charlie", salary: 85000 },
+    ],
   },
 ];
-
 const seed = async () => {
   try {
     await connectDB();

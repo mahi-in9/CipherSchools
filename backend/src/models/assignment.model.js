@@ -38,7 +38,7 @@ const assignmentSchema = new mongoose.Schema(
 
     tables: { type: [tableSchema], required: true },
 
-    samplePreview: { type: Object, default: {} },
+    samplePreview: { type: mongoose.Schema.Types.Mixed, default: {} },
 
     isActive: { type: Boolean, default: true },
   },
